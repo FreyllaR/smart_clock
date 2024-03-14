@@ -12,7 +12,8 @@ import android.os.Message
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.RequiresApi
-import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class ClockView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -34,8 +35,15 @@ class ClockView @JvmOverloads constructor(
         strokeCap = Paint.Cap.ROUND
     }
 
+    private var numbersRadius = 0f
+
     init {
         startTimeUpdates()
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        numbersRadius = Math.min(w, h) / 2f * 0.85f - handStrokeWidth * 2.5f
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -44,7 +52,7 @@ class ClockView @JvmOverloads constructor(
 
         val centerX = width / 2f
         val centerY = height / 2f
-        val radius = Math.min(centerX, centerY - handStrokeWidth / 2)
+        val radius = Math.min(centerX, centerY - handStrokeWidth / 2) - handStrokeWidth * 2
 
         // Rotate canvas by -90 degrees
         canvas.rotate(-90f, centerX, centerY)
@@ -60,8 +68,10 @@ class ClockView @JvmOverloads constructor(
         for (i in 0 until 12) {
             val angle = i * 30f
             val markLength = radius * 0.9f - (radius - handStrokeWidth * 2)
-            val x = centerX + Math.cos(Math.toRadians(angle.toDouble())) * (radius - handStrokeWidth)
-            val y = centerY - Math.sin(Math.toRadians(angle.toDouble())) * (radius - handStrokeWidth)
+            val x =
+                centerX + Math.cos(Math.toRadians(angle.toDouble())) * (radius - handStrokeWidth)
+            val y =
+                centerY - Math.sin(Math.toRadians(angle.toDouble())) * (radius - handStrokeWidth)
             val endX = x + Math.cos(Math.toRadians(angle.toDouble())) * markLength
             val endY = y - Math.sin(Math.toRadians(angle.toDouble())) * markLength
             canvas.drawLine(x.toFloat(), y.toFloat(), endX.toFloat(), endY.toFloat(), paint)
@@ -73,65 +83,103 @@ class ClockView @JvmOverloads constructor(
             if (i % 5 != 0) {
                 val angle = i * 6f
                 val markLength = radius * 0.95f - (radius - handStrokeWidth * 2)
-                val x = centerX + Math.cos(Math.toRadians(angle.toDouble())) * (radius - handStrokeWidth)
-                val y = centerY - Math.sin(Math.toRadians(angle.toDouble())) * (radius - handStrokeWidth)
+                val x =
+                    centerX + Math.cos(Math.toRadians(angle.toDouble())) * (radius - handStrokeWidth)
+                val y =
+                    centerY - Math.sin(Math.toRadians(angle.toDouble())) * (radius - handStrokeWidth)
                 val endX = x + Math.cos(Math.toRadians(angle.toDouble())) * markLength
                 val endY = y - Math.sin(Math.toRadians(angle.toDouble())) * markLength
                 canvas.drawLine(x.toFloat(), y.toFloat(), endX.toFloat(), endY.toFloat(), paint)
             }
         }
 
-        // Draw clock numbers
-        val numbersRadius = radius - handStrokeWidth * 2
+// Draw clock numbers
         paint.textSize = 70f
         paint.textAlign = Paint.Align.CENTER
         paint.style = Paint.Style.FILL
         paint.typeface = Typeface.DEFAULT_BOLD
+        paint.color = Color.BLACK
 
-        // Calculate the width of the widest number (in pixels)
-        val widestNumberWidth = paint.measureText("12".toString())
-
+        val numbersRadiusWithMargin = numbersRadius - handStrokeWidth * 2
         for (i in 1..12) {
             val angle = -i * 30f
-            val x = centerX + Math.cos(Math.toRadians(angle.toDouble())) * (numbersRadius - widestNumberWidth / 2)
-            val y = centerY - Math.sin(Math.toRadians(angle.toDouble())) * (numbersRadius - widestNumberWidth / 2)
+            val x = centerX + Math.cos(Math.toRadians(angle.toDouble())) * numbersRadiusWithMargin
+            val y = centerY - Math.sin(Math.toRadians(angle.toDouble())) * numbersRadiusWithMargin
 
-            // Rotate canvas by 90 degrees to draw numbers vertically
+// Rotate canvas by 90 degrees to draw numbers vertically
             canvas.save()
             canvas.rotate(90f, x.toFloat(), y.toFloat())
             canvas.drawText(i.toString(), x.toFloat(), y.toFloat(), paint)
             canvas.restore()
         }
 
-        // Get current time
-        val currentTime = LocalTime.now()
+// Draw clock border
+        paint.color = Color.BLACK
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = handStrokeWidth * 2
+        canvas.drawCircle(centerX, centerY, radius + handStrokeWidth, paint)
+
+// Update center coordinates after drawing the clock border
+        val newCenterX = centerX + handStrokeWidth / 2
+        val newCenterY = centerY + handStrokeWidth / 2
+
+// Get current time in Moscow timezone
+        val moscowTimeZone = ZoneId.of("Europe/Moscow")
+        val currentTime = ZonedDateTime.now(moscowTimeZone).toLocalTime()
         val hour = currentTime.hour
         val minute = currentTime.minute
         val second = currentTime.second
 
-        // Draw hour hand
+// Draw hour hand
         paint.color = hourHandColor
         paint.strokeWidth = handStrokeWidth
         val hourAngle = (hour * 30 + minute / 2f)
-        drawHand(canvas, centerX, centerY, radius * hourHandLength, -hourAngle, handStrokeWidth)
+        drawHand(
+            canvas,
+            newCenterX,
+            newCenterY,
+            radius * hourHandLength,
+            -hourAngle,
+            handStrokeWidth
+        )
 
-        // Draw minute hand
+// Draw minute hand
         paint.color = minuteHandColor
         val minuteAngle = minute * 6f
-        drawHand(canvas, centerX, centerY, radius * minuteHandLength, -minuteAngle, handStrokeWidth)
+        drawHand(
+            canvas,
+            newCenterX,
+            newCenterY,
+            radius * minuteHandLength,
+            -minuteAngle,
+            handStrokeWidth
+        )
 
-        // Draw second hand
+// Draw second hand
         paint.color = secondHandColor
         val secondAngle = second * 6f
-        drawHand(canvas, centerX, centerY, radius * secondHandLength, -secondAngle, handStrokeWidth)
+        drawHand(
+            canvas,
+            newCenterX,
+            newCenterY,
+            radius * secondHandLength,
+            -secondAngle,
+            handStrokeWidth
+        )
     }
 
-
-    private fun drawHand(canvas: Canvas, centerX: Float, centerY: Float, length: Float, angle: Float, strokeWidth: Float) {
+    private fun drawHand(
+        canvas: Canvas,
+        centerX: Float,
+        centerY: Float,
+        length: Float,
+        angle: Float,
+        strokeWidth: Float
+    ) {
         val startX = centerX
         val startY = centerY
-        val endX = centerX + Math.cos(Math.toRadians(angle.toDouble())) * length
-        val endY = centerY - Math.sin(Math.toRadians(angle.toDouble())) * length
+        val endX = startX + Math.cos(Math.toRadians(angle.toDouble())) * length
+        val endY = startY - Math.sin(Math.toRadians(angle.toDouble())) * length
         paint.strokeWidth = strokeWidth
         canvas.drawLine(startX, startY, endX.toFloat(), endY.toFloat(), paint)
     }
@@ -141,10 +189,10 @@ class ClockView @JvmOverloads constructor(
             override fun handleMessage(msg: Message) {
                 invalidate()
 
+
                 sendEmptyMessageDelayed(0, 1000)
             }
         }
-
         timeUpdateHandler.sendEmptyMessage(0)
     }
 }
