@@ -2,7 +2,7 @@
 ## *Этот репозиторий содержит реализацию тестового задания для стажировки ВКонтакте.*
 ### Демонстрация циферблата в вертикальном положении.
 
-![ВКСТАЖИРОВКА1](https://github.com/FreyllaR/smart_clock/assets/91470277/e7907d4e-4d69-45fc-aa83-3cdd26ce361a)
+<a href="url"><img src=https://github.com/FreyllaR/smart_clock/assets/91470277/e7907d4e-4d69-45fc-aa83-3cdd26ce361a align="left" height="48" width="48" ></a>
 
 ### Так же в горизонтальном.
 
