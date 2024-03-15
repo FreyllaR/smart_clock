@@ -2,13 +2,10 @@
 ## *Этот репозиторий содержит реализацию тестового задания для стажировки ВКонтакте.*
 ### Демонстрация циферблата в вертикальном положении.
 
-<a href="url"><img src=https://github.com/FreyllaR/smart_clock/assets/91470277/e7907d4e-4d69-45fc-aa83-3cdd26ce361a align="left" height="960" width="640" ></a>
-
+![ВКСТАЖИРОВКА1](https://github.com/FreyllaR/smart_clock/assets/91470277/5aa9d40c-e6e2-4eca-a193-2e812fa24329)
 
 ### Так же в горизонтальном.
 
-
-<a href="url"><img src=https://github.com/FreyllaR/smart_clock/assets/91470277/93036916-1c45-421c-8af7-47fbfb3813d7 align="left" height="640" width="960" ></a>
-
+![ВКСТАЖИРОВКА2](https://github.com/FreyllaR/smart_clock/assets/91470277/3f2b4089-2396-4561-b01f-d0b88f6a888f)
 
 > Было не сложно, но я очень переживаю что не пройду :shipit:
